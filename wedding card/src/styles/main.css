@@ -1,0 +1,459 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap');
+
+/* Typed custom property — needed for calc() arithmetic with angles */
+@property --angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   CSS Variables — edit these to adjust layout & sizes
+───────────────────────────────────────────────────── */
+:root {
+  --font-serif:     'Cormorant Garamond', Georgia, serif;
+  --color-bg:       #f2ede6;
+  --color-gold:     #b8a880;
+  --color-dark:     #3a2e20;
+  --color-muted:    #6b5a3e;
+  --color-envelope: #c8bba0;
+
+  /* Envelope card */
+  --env-w: 260px;
+  --env-h: 174px;
+
+  /* Video square (when scrolled) */
+  --vid-size: 155px;
+  --vid-half: 78px;   /* = vid-size / 2 */
+
+  /* Gap between video edge and frames */
+  --frame-gap: 8px;
+
+  /* Frame heights — used to position Save the Date / Names text */
+  --tc-h: 100px;   /* top-center frame height  */
+  --bc-h:  80px;   /* bottom-center frame height */
+
+  /* Extra spacing above/below frames for text */
+  --title-offset: 20px;
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+  :root {
+    --env-w: 320px;
+    --env-h: 213px;
+    --vid-size: 230px;
+    --vid-half: 115px;
+    --frame-gap: 10px;
+    --tc-h: 140px;
+    --bc-h: 110px;
+    --title-offset: 24px;
+  }
+}
+
+/* Laptop / Desktop */
+@media (min-width: 1024px) {
+  :root {
+    --env-w: 360px;
+    --env-h: 240px;
+    --vid-size: 280px;
+    --vid-half: 140px;
+    --frame-gap: 12px;
+    --tc-h: 175px;
+    --bc-h: 135px;
+    --title-offset: 28px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   Animations
+───────────────────────────────────────────────────── */
+@keyframes flapOpen {
+  from { transform: rotateX(0deg); }
+  to   { transform: rotateX(-170deg); }
+}
+
+/* Default — for frames with no centering transform */
+@keyframes flyOut {
+  from { opacity: 0; transform: scale(0.3); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Frame fly-in — scale + fade only; transform handled by --angle */
+@keyframes frameFlyIn {
+  from { opacity: 0; scale: 0.05; }
+  to   { opacity: 1; scale: 1; }
+}
+
+/* Per-frame orbit — animate --angle so the transform formula auto-updates */
+@keyframes orbitT1 { from { --angle: -90deg;  } to { --angle:  270deg; } }
+@keyframes orbitT2 { from { --angle: -45deg;  } to { --angle:  315deg; } }
+@keyframes orbitMr { from { --angle:   0deg;  } to { --angle:  360deg; } }
+@keyframes orbitB3 { from { --angle:  45deg;  } to { --angle:  405deg; } }
+@keyframes orbitB2 { from { --angle:  90deg;  } to { --angle:  450deg; } }
+@keyframes orbitB1 { from { --angle: 135deg;  } to { --angle:  495deg; } }
+@keyframes orbitMl { from { --angle: 180deg;  } to { --angle:  540deg; } }
+@keyframes orbitT3 { from { --angle: -135deg; } to { --angle:  225deg; } }
+
+@keyframes bgFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.4; transform: scaleY(0.8); }
+  50%       { opacity: 1;   transform: scaleY(1); }
+}
+
+/* ─────────────────────────────────────────────────────
+   Screen 1 — Envelope hero
+───────────────────────────────────────────────────── */
+.hero-screen {
+  height: 100vh;
+  background: var(--color-bg);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(ellipse 90% 90% at 50% 50%, transparent 55%, rgba(180,165,145,0.28) 100%);
+}
+
+/* ─────────────────────────────────────────────────────
+   Envelope scene (wrapper around all hero content)
+───────────────────────────────────────────────────── */
+.envelope-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 0 20px;
+  transition: opacity 0.6s ease;
+}
+
+@media (min-width: 640px)  { .envelope-scene { gap: 32px; } }
+@media (min-width: 1024px) { .envelope-scene { gap: 40px; } }
+
+.envelope-scene--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.envelope-subtitle {
+  font-family: var(--font-serif);
+  font-size: 9px;
+  letter-spacing: 5px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+@media (min-width: 640px)  { .envelope-subtitle { font-size: 10px; letter-spacing: 6px; } }
+@media (min-width: 1024px) { .envelope-subtitle { font-size: 11px; letter-spacing: 8px; } }
+
+/* ─────────────────────────────────────────────────────
+   Envelope card
+───────────────────────────────────────────────────── */
+.envelope-wrap {
+  width: var(--env-w);
+  height: var(--env-h);
+  position: relative;
+  cursor: pointer;
+}
+
+.envelope-wrap--inactive { cursor: default; }
+
+.envelope-body {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #ffffff 0%, #f5f0e8 100%);
+  border: 1px solid var(--color-envelope);
+  border-radius: 4px;
+  position: relative;
+  box-shadow:
+    0 0 0 1px #e0d5c0,
+    0 32px 80px rgba(80,60,30,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+.envelope-inner-accent {
+  position: absolute;
+  inset: 6px;
+  border: 0.5px solid rgba(150,130,90,0.22);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.envelope-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.flap-open {
+  animation: flapOpen 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: top center;
+  transform-box: fill-box;
+}
+
+/* ─────────────────────────────────────────────────────
+   CTA — "Open your invitation"
+───────────────────────────────────────────────────── */
+.cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: opacity 0.3s ease;
+}
+
+.cta--hidden { opacity: 0; }
+
+.cta-line {
+  height: 0.5px;
+  width: 28px;
+}
+.cta-line--left  { background: linear-gradient(to right, transparent, var(--color-muted)); }
+.cta-line--right { background: linear-gradient(to left,  transparent, var(--color-muted)); }
+
+.cta-text {
+  font-family: var(--font-serif);
+  font-size: 8px;
+  letter-spacing: 4px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px)  { .cta-line { width: 34px; } .cta-text { font-size: 9px;  letter-spacing: 5px; } }
+@media (min-width: 1024px) { .cta-line { width: 40px; } .cta-text { font-size: 10px; letter-spacing: 6px; } }
+
+/* ─────────────────────────────────────────────────────
+   Scroll cue
+───────────────────────────────────────────────────── */
+.scroll-cue {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: fadeInUp 1s ease 0.8s both;
+}
+
+.scroll-cue-label {
+  font-size: 8px;
+  letter-spacing: 5px;
+  color: rgba(255,255,255,0.65);
+  text-transform: uppercase;
+}
+
+.scroll-cue-line {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.6), transparent);
+  animation: scrollPulse 1.6s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────
+   Gallery overlay
+───────────────────────────────────────────────────── */
+.gallery {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  background: var(--color-bg);
+  animation: bgFade 0.5s ease both;
+}
+
+/* Orbit ring — sits at screen center, rotates slowly */
+.orbit-ring {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 18;
+  animation: ringRotate 28s linear infinite;
+}
+
+/* ─────────────────────────────────────────────────────
+   Save the Date
+───────────────────────────────────────────────────── */
+.save-the-date {
+  position: fixed;
+  /* sits above the tallest top frame — t1 is 2 rows above center */
+  bottom: calc(50% + var(--orbit-r) + 36px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 22;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: fadeInUp 0.7s ease 0.1s both;
+  white-space: nowrap;
+}
+
+.save-the-date-text {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  letter-spacing: 6px;
+  font-size: 28px;
+}
+
+@media (min-width: 640px)  { .save-the-date-text { font-size: 48px; letter-spacing: 10px; } }
+@media (min-width: 1024px) { .save-the-date-text { font-size: 64px; letter-spacing: 14px; } }
+
+/* ─────────────────────────────────────────────────────
+   Names
+───────────────────────────────────────────────────── */
+.names {
+  position: fixed;
+  /* sits below b3 — the lowest frame */
+  top: calc(50% + var(--orbit-r) + 36px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 22;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation: fadeInUp 0.7s ease 0.2s both;
+  white-space: nowrap;
+}
+
+.names-text {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--color-dark);
+  letter-spacing: 1px;
+  font-size: 22px;
+}
+
+@media (min-width: 640px)  { .names-text { font-size: 34px; letter-spacing: 2px; } }
+@media (min-width: 1024px) { .names-text { font-size: 48px; letter-spacing: 3px; } }
+
+/* ─────────────────────────────────────────────────────
+   Gold divider line
+───────────────────────────────────────────────────── */
+.gold-line {
+  width: 50px;
+  height: 0.5px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+}
+
+@media (min-width: 640px)  { .gold-line { width: 64px; } }
+@media (min-width: 1024px) { .gold-line { width: 80px; } }
+
+/* ─────────────────────────────────────────────────────
+   Photo frames — shared base styles
+───────────────────────────────────────────────────── */
+.photo-frame {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 18;
+  background: #e8e2d8;
+  border: 1px solid var(--color-envelope);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  /* Orbital position — rotate by --angle, move out, counter-rotate to stay upright */
+  transform: rotate(var(--angle)) translateX(var(--orbit-r)) rotate(calc(-1 * var(--angle))) translate(-50%, -50%);
+}
+
+.photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-placeholder-icon  { font-size: 16px; color: #c0b090; }
+.photo-placeholder-label { font-size: 7px; letter-spacing: 3px; color: #9a8870; text-transform: uppercase; }
+
+/* ─────────────────────────────────────────────────────
+   Orbit radius — distance from video center to frame center
+───────────────────────────────────────────────────── */
+:root                      { --orbit-r: 160px; }
+@media (min-width: 640px)  { :root { --orbit-r: 230px; } }
+@media (min-width: 1024px) { :root { --orbit-r: 300px; } }
+
+/* ─────────────────────────────────────────────────────
+   Per-frame: starting angle + fly-in + continuous orbit
+───────────────────────────────────────────────────── */
+.frame-t1 { --angle: -90deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitT1 28s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-t2 { --angle: -45deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitT2 28s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-mr { --angle:   0deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitMr 28s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-b3 { --angle:  45deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitB3 28s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-b2 { --angle:  90deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitB2 28s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-b1 { --angle: 135deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitB1 28s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-ml { --angle: 180deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitMl 28s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-t3 { --angle: -135deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitT3 28s linear calc(var(--delay) + 0.9s) infinite; }
+
+/* ─────────────────────────────────────────────────────
+   Frame sizes per breakpoint
+───────────────────────────────────────────────────── */
+
+/* Mobile */
+.frame-t1 { width:  98px; height: 65px;  }
+.frame-t2 { width:  78px; height: 78px;  }
+.frame-mr { width:  62px; height: 94px;  }
+.frame-b3 { width:  75px; height: 58px;  }
+.frame-b2 { width: 104px; height: 70px;  }
+.frame-b1 { width:  72px; height: 72px;  }
+.frame-ml { width:  62px; height: 94px;  }
+.frame-t3 { width:  72px; height: 55px;  }
+
+/* Tablet */
+@media (min-width: 640px) {
+  .frame-t1 { width: 150px; height: 100px; }
+  .frame-t2 { width: 120px; height: 120px; }
+  .frame-mr { width:  95px; height: 145px; }
+  .frame-b3 { width: 115px; height:  90px; }
+  .frame-b2 { width: 160px; height: 108px; }
+  .frame-b1 { width: 110px; height: 110px; }
+  .frame-ml { width:  95px; height: 145px; }
+  .frame-t3 { width: 110px; height:  85px; }
+}
+
+/* Laptop / Desktop */
+@media (min-width: 1024px) {
+  .frame-t1 { width: 195px; height: 130px; }
+  .frame-t2 { width: 155px; height: 155px; }
+  .frame-mr { width: 125px; height: 190px; }
+  .frame-b3 { width: 150px; height: 115px; }
+  .frame-b2 { width: 210px; height: 140px; }
+  .frame-b1 { width: 145px; height: 145px; }
+  .frame-ml { width: 125px; height: 190px; }
+  .frame-t3 { width: 145px; height: 110px; }
+}
