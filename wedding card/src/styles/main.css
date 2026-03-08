@@ -96,6 +96,24 @@
 @keyframes orbitMl { from { --angle: 180deg;  } to { --angle:  540deg; } }
 @keyframes orbitT3 { from { --angle: -135deg; } to { --angle:  225deg; } }
 
+/* Counter-clockwise orbit — outer ring (angles decrease by 360) */
+@keyframes orbitO1  { from { --angle:   -90deg; } to { --angle:  -450deg; } }
+@keyframes orbitO2  { from { --angle:   -45deg; } to { --angle:  -405deg; } }
+@keyframes orbitO3  { from { --angle:     0deg; } to { --angle:  -360deg; } }
+@keyframes orbitO4  { from { --angle:    45deg; } to { --angle:  -315deg; } }
+@keyframes orbitO5  { from { --angle:    90deg; } to { --angle:  -270deg; } }
+@keyframes orbitO6  { from { --angle:   135deg; } to { --angle:  -225deg; } }
+@keyframes orbitO7  { from { --angle:   180deg; } to { --angle:  -180deg; } }
+@keyframes orbitO8  { from { --angle:  -135deg; } to { --angle:  -495deg; } }
+@keyframes orbitO9  { from { --angle:   -67.5deg; } to { --angle: -427.5deg; } }
+@keyframes orbitO10 { from { --angle:   -22.5deg; } to { --angle: -382.5deg; } }
+@keyframes orbitO11 { from { --angle:    22.5deg; } to { --angle: -337.5deg; } }
+@keyframes orbitO12 { from { --angle:    67.5deg; } to { --angle: -292.5deg; } }
+@keyframes orbitO13 { from { --angle:   112.5deg; } to { --angle: -247.5deg; } }
+@keyframes orbitO14 { from { --angle:   157.5deg; } to { --angle: -202.5deg; } }
+@keyframes orbitO15 { from { --angle:  -157.5deg; } to { --angle: -517.5deg; } }
+@keyframes orbitO16 { from { --angle:  -112.5deg; } to { --angle: -472.5deg; } }
+
 @keyframes bgFade {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -301,8 +319,8 @@
 ───────────────────────────────────────────────────── */
 .save-the-date {
   position: fixed;
-  /* sits above the tallest top frame — t1 is 2 rows above center */
-  bottom: calc(50% + var(--orbit-r) + 36px);
+  /* sits above the outer ring */
+  bottom: calc(50% + var(--orbit-r-outer) + 76px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 22;
@@ -320,7 +338,7 @@
   text-transform: uppercase;
   color: var(--color-dark);
   letter-spacing: 6px;
-  font-size: 28px;
+  font-size: 48px;
 }
 
 @media (min-width: 640px)  { .save-the-date-text { font-size: 48px; letter-spacing: 10px; } }
@@ -331,8 +349,8 @@
 ───────────────────────────────────────────────────── */
 .names {
   position: fixed;
-  /* sits below b3 — the lowest frame */
-  top: calc(50% + var(--orbit-r) + 36px);
+  /* sits below the outer ring */
+  top: calc(50% + var(--orbit-r-outer) + 86px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 22;
@@ -350,7 +368,7 @@
   font-style: italic;
   color: var(--color-dark);
   letter-spacing: 1px;
-  font-size: 22px;
+  font-size: 32px;
 }
 
 @media (min-width: 640px)  { .names-text { font-size: 34px; letter-spacing: 2px; } }
@@ -408,6 +426,11 @@
 @media (min-width: 640px)  { :root { --orbit-r: 230px; } }
 @media (min-width: 1024px) { :root { --orbit-r: 300px; } }
 
+/* Outer ring orbit radius — further from inner ring */
+:root                      { --orbit-r-outer: 310px; }
+@media (min-width: 640px)  { :root { --orbit-r-outer: 455px; } }
+@media (min-width: 1024px) { :root { --orbit-r-outer: 600px; } }
+
 /* ─────────────────────────────────────────────────────
    Per-frame: starting angle + fly-in + continuous orbit
 ───────────────────────────────────────────────────── */
@@ -456,4 +479,90 @@
   .frame-b1 { width: 145px; height: 145px; }
   .frame-ml { width: 125px; height: 190px; }
   .frame-t3 { width: 145px; height: 110px; }
+}
+
+/* ─────────────────────────────────────────────────────
+   Outer ring — counter-clockwise, larger orbit
+───────────────────────────────────────────────────── */
+
+/* Override base transform to use --orbit-r-outer; sit behind inner frames */
+.photo-frame-outer {
+  z-index: 16;
+  transform: rotate(var(--angle)) translateX(var(--orbit-r-outer)) rotate(calc(-1 * var(--angle))) translate(-50%, -50%);
+}
+
+/* Per-frame: starting angle + fly-in + counter-clockwise orbit (36s) */
+.frame-o1  { --angle:   -90deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO1  36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o2  { --angle:   -45deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO2  36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o3  { --angle:     0deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO3  36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o4  { --angle:    45deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO4  36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o5  { --angle:    90deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO5  36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o6  { --angle:   135deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO6  36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o7  { --angle:   180deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO7  36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o8  { --angle:  -135deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO8  36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o9  { --angle:  -67.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO9  36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o10 { --angle:  -22.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO10 36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o11 { --angle:   22.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO11 36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o12 { --angle:   67.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO12 36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o13 { --angle:  112.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO13 36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o14 { --angle:  157.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO14 36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o15 { --angle: -157.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO15 36s linear calc(var(--delay) + 0.9s) infinite; }
+.frame-o16 { --angle: -112.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO16 36s linear calc(var(--delay) + 0.9s) infinite; }
+
+/* Mobile — ~50% larger than inner frames */
+.frame-o1  { width: 148px; height:  98px; }
+.frame-o2  { width: 117px; height: 117px; }
+.frame-o3  { width:  93px; height: 141px; }
+.frame-o4  { width: 113px; height:  87px; }
+.frame-o5  { width: 156px; height: 105px; }
+.frame-o6  { width: 108px; height: 108px; }
+.frame-o7  { width:  93px; height: 141px; }
+.frame-o8  { width: 108px; height:  83px; }
+.frame-o9  { width: 120px; height:  88px; }
+.frame-o10 { width: 110px; height: 110px; }
+.frame-o11 { width:  88px; height: 132px; }
+.frame-o12 { width: 125px; height:  92px; }
+.frame-o13 { width: 105px; height: 105px; }
+.frame-o14 { width:  90px; height: 135px; }
+.frame-o15 { width: 115px; height:  85px; }
+.frame-o16 { width:  95px; height: 125px; }
+
+/* Tablet */
+@media (min-width: 640px) {
+  .frame-o1  { width: 225px; height: 150px; }
+  .frame-o2  { width: 180px; height: 180px; }
+  .frame-o3  { width: 143px; height: 218px; }
+  .frame-o4  { width: 173px; height: 135px; }
+  .frame-o5  { width: 240px; height: 162px; }
+  .frame-o6  { width: 165px; height: 165px; }
+  .frame-o7  { width: 143px; height: 218px; }
+  .frame-o8  { width: 165px; height: 128px; }
+  .frame-o9  { width: 184px; height: 135px; }
+  .frame-o10 { width: 168px; height: 168px; }
+  .frame-o11 { width: 135px; height: 202px; }
+  .frame-o12 { width: 191px; height: 141px; }
+  .frame-o13 { width: 161px; height: 161px; }
+  .frame-o14 { width: 138px; height: 207px; }
+  .frame-o15 { width: 176px; height: 130px; }
+  .frame-o16 { width: 145px; height: 191px; }
+}
+
+/* Laptop / Desktop */
+@media (min-width: 1024px) {
+  .frame-o1  { width: 292px; height: 195px; }
+  .frame-o2  { width: 232px; height: 232px; }
+  .frame-o3  { width: 188px; height: 285px; }
+  .frame-o4  { width: 225px; height: 173px; }
+  .frame-o5  { width: 315px; height: 210px; }
+  .frame-o6  { width: 218px; height: 218px; }
+  .frame-o7  { width: 188px; height: 285px; }
+  .frame-o8  { width: 218px; height: 165px; }
+  .frame-o9  { width: 240px; height: 176px; }
+  .frame-o10 { width: 220px; height: 220px; }
+  .frame-o11 { width: 176px; height: 264px; }
+  .frame-o12 { width: 250px; height: 184px; }
+  .frame-o13 { width: 210px; height: 210px; }
+  .frame-o14 { width: 180px; height: 270px; }
+  .frame-o15 { width: 230px; height: 170px; }
+  .frame-o16 { width: 190px; height: 250px; }
 }
