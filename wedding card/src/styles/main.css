@@ -1,11 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap');
 
-/* Typed custom property — needed for calc() arithmetic with angles */
-@property --angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
 
 
 /* ─────────────────────────────────────────────────────
@@ -67,53 +61,10 @@
 }
 
 /* ─────────────────────────────────────────────────────
-   Animations
+   Animations — only bg fade and scroll cue remain.
+   All other animations (flap, orbit, fly-in, collapse)
+   are driven by GSAP in JS.
 ───────────────────────────────────────────────────── */
-@keyframes flapOpen {
-  from { transform: rotateX(0deg); }
-  to   { transform: rotateX(-170deg); }
-}
-
-/* Default — for frames with no centering transform */
-@keyframes flyOut {
-  from { opacity: 0; transform: scale(0.3); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-/* Frame fly-in — scale + fade only; transform handled by --angle */
-@keyframes frameFlyIn {
-  from { opacity: 0; scale: 0.05; }
-  to   { opacity: 1; scale: 1; }
-}
-
-/* Per-frame orbit — animate --angle so the transform formula auto-updates */
-@keyframes orbitT1 { from { --angle: -90deg;  } to { --angle:  270deg; } }
-@keyframes orbitT2 { from { --angle: -45deg;  } to { --angle:  315deg; } }
-@keyframes orbitMr { from { --angle:   0deg;  } to { --angle:  360deg; } }
-@keyframes orbitB3 { from { --angle:  45deg;  } to { --angle:  405deg; } }
-@keyframes orbitB2 { from { --angle:  90deg;  } to { --angle:  450deg; } }
-@keyframes orbitB1 { from { --angle: 135deg;  } to { --angle:  495deg; } }
-@keyframes orbitMl { from { --angle: 180deg;  } to { --angle:  540deg; } }
-@keyframes orbitT3 { from { --angle: -135deg; } to { --angle:  225deg; } }
-
-/* Counter-clockwise orbit — outer ring (angles decrease by 360) */
-@keyframes orbitO1  { from { --angle:   -90deg; } to { --angle:  -450deg; } }
-@keyframes orbitO2  { from { --angle:   -45deg; } to { --angle:  -405deg; } }
-@keyframes orbitO3  { from { --angle:     0deg; } to { --angle:  -360deg; } }
-@keyframes orbitO4  { from { --angle:    45deg; } to { --angle:  -315deg; } }
-@keyframes orbitO5  { from { --angle:    90deg; } to { --angle:  -270deg; } }
-@keyframes orbitO6  { from { --angle:   135deg; } to { --angle:  -225deg; } }
-@keyframes orbitO7  { from { --angle:   180deg; } to { --angle:  -180deg; } }
-@keyframes orbitO8  { from { --angle:  -135deg; } to { --angle:  -495deg; } }
-@keyframes orbitO9  { from { --angle:   -67.5deg; } to { --angle: -427.5deg; } }
-@keyframes orbitO10 { from { --angle:   -22.5deg; } to { --angle: -382.5deg; } }
-@keyframes orbitO11 { from { --angle:    22.5deg; } to { --angle: -337.5deg; } }
-@keyframes orbitO12 { from { --angle:    67.5deg; } to { --angle: -292.5deg; } }
-@keyframes orbitO13 { from { --angle:   112.5deg; } to { --angle: -247.5deg; } }
-@keyframes orbitO14 { from { --angle:   157.5deg; } to { --angle: -202.5deg; } }
-@keyframes orbitO15 { from { --angle:  -157.5deg; } to { --angle: -517.5deg; } }
-@keyframes orbitO16 { from { --angle:  -112.5deg; } to { --angle: -472.5deg; } }
-
 @keyframes bgFade {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -168,11 +119,6 @@
 @media (min-width: 640px)  { .envelope-scene { gap: 32px; } }
 @media (min-width: 1024px) { .envelope-scene { gap: 40px; } }
 
-.envelope-scene--hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
 .envelope-subtitle {
   font-family: var(--font-serif);
   font-size: 9px;
@@ -204,6 +150,7 @@
   border: 1px solid var(--color-envelope);
   border-radius: 4px;
   position: relative;
+  perspective: 700px; /* enables 3D rotateX on .envelope-flap child */
   box-shadow:
     0 0 0 1px #e0d5c0,
     0 32px 80px rgba(80,60,30,0.18),
@@ -225,10 +172,18 @@
   height: 100%;
 }
 
-.flap-open {
-  animation: flapOpen 0.85s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+/* Flap — HTML div clipped to triangle, pivots from top edge via perspective on parent */
+.envelope-flap {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  /* 53.333% = 128/240 — matches the SVG polygon tip position */
+  clip-path: polygon(0 0, 100% 0, 50% 53.333%);
+  background: linear-gradient(170deg, #f0ebe0 0%, #e4ddd0 100%);
   transform-origin: top center;
-  transform-box: fill-box;
+  backface-visibility: hidden; /* hides back face after fold passes 90° */
+  pointer-events: none;
+  will-change: transform;
 }
 
 /* ─────────────────────────────────────────────────────
@@ -303,6 +258,24 @@
   animation: bgFade 0.5s ease both;
 }
 
+/* ─────────────────────────────────────────────────────
+   Frames cluster — wrapper that converges all frames to center
+   Fixed children of a transformed parent are positioned relative
+   to that parent, so scale(0) pulls everything to the center.
+───────────────────────────────────────────────────── */
+.frames-cluster {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 18;
+  transform-origin: 0 0;
+  transform: scale(1);
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.7s ease;
+  will-change: transform, opacity;
+}
+
 /* Orbit ring — sits at screen center, rotates slowly */
 .orbit-ring {
   position: fixed;
@@ -311,7 +284,6 @@
   width: 0;
   height: 0;
   z-index: 18;
-  animation: ringRotate 28s linear infinite;
 }
 
 /* ─────────────────────────────────────────────────────
@@ -387,26 +359,51 @@
 @media (min-width: 1024px) { .gold-line { width: 80px; } }
 
 /* ─────────────────────────────────────────────────────
+   Orbit wrappers — one per frame, centered in frames-cluster
+   CSS `rotate` animates on compositor (zero main-thread cost)
+───────────────────────────────────────────────────── */
+.rotate-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  will-change: rotate;
+}
+.rotate-wrap-inner { /* orbit driven by GSAP */ }
+.rotate-wrap-outer { /* orbit driven by GSAP */ }
+
+/* ─────────────────────────────────────────────────────
    Photo frames — shared base styles
+   position: absolute inside rotate-wrap; `left` = orbit radius
 ───────────────────────────────────────────────────── */
 .photo-frame {
-  position: fixed;
-  top: 50%;
-  left: 50%;
+  position: absolute;
+  top: 0;
+  left: var(--orbit-r);
+  /* individual `translate` ensures the rotation pivot stays at the frame's
+     visual center regardless of the `rotate` animation angle.
+     Using `transform: translate()` instead would cause the center to drift. */
+  translate: -50% -50%;
   z-index: 18;
   background: #e8e2d8;
   border: 1px solid var(--color-envelope);
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
+}
 
-  /* Orbital position — rotate by --angle, move out, counter-rotate to stay upright */
-  transform: rotate(var(--angle)) translateX(var(--orbit-r)) rotate(calc(-1 * var(--angle))) translate(-50%, -50%);
+/* Inner ring frames counter-rotate to stay upright — rotation driven by GSAP */
+.rotate-wrap-inner .photo-frame { }
+
+/* Outer ring: larger orbit radius, sit behind inner */
+.rotate-wrap-outer .photo-frame {
+  left: var(--orbit-r-outer);
+  z-index: 16;
 }
 
 .photo-frame img {
@@ -432,19 +429,8 @@
 @media (min-width: 1024px) { :root { --orbit-r-outer: 600px; } }
 
 /* ─────────────────────────────────────────────────────
-   Per-frame: starting angle + fly-in + continuous orbit
-───────────────────────────────────────────────────── */
-.frame-t1 { --angle: -90deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitT1 28s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-t2 { --angle: -45deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitT2 28s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-mr { --angle:   0deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitMr 28s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-b3 { --angle:  45deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitB3 28s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-b2 { --angle:  90deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitB2 28s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-b1 { --angle: 135deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitB1 28s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-ml { --angle: 180deg;  animation: frameFlyIn 0.9s ease var(--delay) both, orbitMl 28s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-t3 { --angle: -135deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitT3 28s linear calc(var(--delay) + 0.9s) infinite; }
-
-/* ─────────────────────────────────────────────────────
    Frame sizes per breakpoint
+   (orbit + fly-in handled by .rotate-wrap + .photo-frame rules)
 ───────────────────────────────────────────────────── */
 
 /* Mobile */
@@ -482,32 +468,9 @@
 }
 
 /* ─────────────────────────────────────────────────────
-   Outer ring — counter-clockwise, larger orbit
+   Outer ring frame sizes
+   (orbit handled by .rotate-wrap-outer .photo-frame rules)
 ───────────────────────────────────────────────────── */
-
-/* Override base transform to use --orbit-r-outer; sit behind inner frames */
-.photo-frame-outer {
-  z-index: 16;
-  transform: rotate(var(--angle)) translateX(var(--orbit-r-outer)) rotate(calc(-1 * var(--angle))) translate(-50%, -50%);
-}
-
-/* Per-frame: starting angle + fly-in + counter-clockwise orbit (36s) */
-.frame-o1  { --angle:   -90deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO1  36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o2  { --angle:   -45deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO2  36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o3  { --angle:     0deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO3  36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o4  { --angle:    45deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO4  36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o5  { --angle:    90deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO5  36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o6  { --angle:   135deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO6  36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o7  { --angle:   180deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO7  36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o8  { --angle:  -135deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO8  36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o9  { --angle:  -67.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO9  36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o10 { --angle:  -22.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO10 36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o11 { --angle:   22.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO11 36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o12 { --angle:   67.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO12 36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o13 { --angle:  112.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO13 36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o14 { --angle:  157.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO14 36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o15 { --angle: -157.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO15 36s linear calc(var(--delay) + 0.9s) infinite; }
-.frame-o16 { --angle: -112.5deg; animation: frameFlyIn 0.9s ease var(--delay) both, orbitO16 36s linear calc(var(--delay) + 0.9s) infinite; }
 
 /* Mobile — ~50% larger than inner frames */
 .frame-o1  { width: 148px; height:  98px; }

@@ -1,10 +1,32 @@
 // EnvelopeCard — the visual envelope with SVG, flap, seal and CTA
+import { useRef, useEffect } from 'react'
+import gsap from 'gsap'
 
 const EnvelopeCard = ({ phase, onOpen }) => {
-  const isHidden = phase === 'expanding' || phase === 'done'
+  const sceneRef = useRef(null)
+  const flapRef  = useRef(null)
+
+  // Flap open animation
+  useEffect(() => {
+    if (phase === 'flap' && flapRef.current) {
+      // .envelope-flap CSS sets transform-box:fill-box + transform-origin:top center
+      // so GSAP rotates the polygon around its own top edge (realistic fold)
+      gsap.fromTo(flapRef.current,
+        { rotateX: 0 },
+        { rotateX: -175, duration: 0.9, ease: 'power2.inOut' }
+      )
+    }
+  }, [phase])
+
+  // Fade out scene when expanding
+  useEffect(() => {
+    if ((phase === 'expanding' || phase === 'done') && sceneRef.current) {
+      gsap.to(sceneRef.current, { opacity: 0, pointerEvents: 'none', duration: 0.4, ease: 'power1.in' })
+    }
+  }, [phase])
 
   return (
-    <div className={`envelope-scene${isHidden ? ' envelope-scene--hidden' : ''}`}>
+    <div ref={sceneRef} className="envelope-scene">
 
       <div className="envelope-subtitle">You are cordially invited</div>
 
@@ -15,12 +37,11 @@ const EnvelopeCard = ({ phase, onOpen }) => {
         <div className="envelope-body">
           <div className="envelope-inner-accent" />
 
+          {/* HTML flap div — clip-path gives the triangle shape, perspective on parent makes rotateX 3D */}
+          <div ref={flapRef} className="envelope-flap" />
+
           <svg className="envelope-svg" viewBox="0 0 360 240" preserveAspectRatio="none">
             <defs>
-              <linearGradient id="flapGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#f0ebe0" />
-                <stop offset="100%" stopColor="#e4ddd0" />
-              </linearGradient>
               <linearGradient id="goldLine" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%"   stopColor="transparent" />
                 <stop offset="30%"  stopColor="#b8a880" />
@@ -33,14 +54,7 @@ const EnvelopeCard = ({ phase, onOpen }) => {
             <line x1="0"   y1="240" x2="180" y2="120" stroke="#c0b090" strokeWidth="0.8" />
             <line x1="360" y1="240" x2="180" y2="120" stroke="#c0b090" strokeWidth="0.8" />
 
-            {/* Flap — animates open on click */}
-            <polygon
-              points="0,0 360,0 180,128"
-              fill="url(#flapGrad)"
-              className={phase !== 'idle' ? 'flap-open' : ''}
-            />
-
-            {/* Flap crease lines */}
+            {/* Flap crease lines — remain as fold marks on body after flap opens */}
             <line x1="0"   y1="0" x2="180" y2="128" stroke="#c0b090" strokeWidth="0.8" />
             <line x1="360" y1="0" x2="180" y2="128" stroke="#c0b090" strokeWidth="0.8" />
 
