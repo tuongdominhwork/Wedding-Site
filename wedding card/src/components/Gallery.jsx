@@ -4,34 +4,34 @@ import PhotoFrame from './PhotoFrame'
 
 // ── Inner ring (clockwise, 28 s) ────────────────────────────────
 const FRAMES = [
-  { key: 't1', delay:   0, startAngle: -90,  image: '/images/IMG_2968.jpeg' },
-  { key: 't2', delay:  50, startAngle: -45,  image: '/images/IMG_2969.jpeg' },
-  { key: 'mr', delay: 100, startAngle:   0,  image: '/images/IMG_2970.jpeg' },
-  { key: 'b3', delay: 150, startAngle:  45,  image: '/images/IMG_2972.jpeg' },
-  { key: 'b2', delay: 200, startAngle:  90,  image: '/images/IMG_3005.jpeg' },
-  { key: 'b1', delay: 150, startAngle: 135,  image: '/images/IMG_2974.jpeg' },
-  { key: 'ml', delay: 100, startAngle: 180,  image: '/images/IMG_2971.jpeg' },
-  { key: 't3', delay:  50, startAngle: -135, image: '/images/IMG_3006.jpeg' },
+  { key: 't1', delay:   0, startAngle: -90,  image: '/images/webp/IMG_2968.webp' },
+  { key: 't2', delay:  50, startAngle: -45,  image: '/images/webp/IMG_2969.webp' },
+  { key: 'mr', delay: 100, startAngle:   0,  image: '/images/webp/IMG_2970.webp' },
+  { key: 'b3', delay: 150, startAngle:  45,  image: '/images/webp/IMG_2972.webp' },
+  { key: 'b2', delay: 200, startAngle:  90,  image: '/images/webp/IMG_3005.webp' },
+  { key: 'b1', delay: 150, startAngle: 135,  image: '/images/webp/IMG_2974.webp' },
+  { key: 'ml', delay: 100, startAngle: 180,  image: '/images/webp/IMG_2971.webp' },
+  { key: 't3', delay:  50, startAngle: -135, image: '/images/webp/IMG_3006.webp' },
 ]
 
 // ── Outer ring (counter-clockwise, 36 s) ────────────────────────
 const FRAMES_OUTER = [
-  { key: 'o1',  delay: 2000, startAngle:  -90,   image: '/images/IMG_2973.jpeg' },
-  { key: 'o9',  delay: 2020, startAngle:  -67.5, image: '/images/IMG_2971.jpeg' },
-  { key: 'o2',  delay: 2050, startAngle:  -45,   image: '/images/IMG_2976.jpeg' },
-  { key: 'o10', delay: 2070, startAngle:  -22.5, image: '/images/IMG_2972.jpeg' },
-  { key: 'o3',  delay: 2100, startAngle:    0,   image: '/images/IMG_2979.jpeg' },
-  { key: 'o11', delay: 2120, startAngle:   22.5, image: '/images/IMG_3005.jpeg' },
-  { key: 'o4',  delay: 2150, startAngle:   45,   image: '/images/IMG_2980.jpeg' },
-  { key: 'o12', delay: 2170, startAngle:   67.5, image: '/images/IMG_3006.jpeg' },
-  { key: 'o5',  delay: 2200, startAngle:   90,   image: '/images/IMG_3004.jpeg' },
-  { key: 'o13', delay: 2170, startAngle:  112.5, image: '/images/IMG_2974.jpeg' },
-  { key: 'o6',  delay: 2150, startAngle:  135,   image: '/images/IMG_2968.jpeg' },
-  { key: 'o14', delay: 2120, startAngle:  157.5, image: '/images/IMG_2971.jpeg' },
-  { key: 'o7',  delay: 2100, startAngle:  180,   image: '/images/IMG_2969.jpeg' },
-  { key: 'o15', delay: 2070, startAngle: -157.5, image: '/images/IMG_2972.jpeg' },
-  { key: 'o8',  delay: 2050, startAngle: -135,   image: '/images/IMG_2970.jpeg' },
-  { key: 'o16', delay: 2020, startAngle: -112.5, image: '/images/IMG_2974.jpeg' },
+  { key: 'o1',  delay: 2000, startAngle:  -90,   image: '/images/webp/IMG_2973.webp' },
+  { key: 'o9',  delay: 2020, startAngle:  -67.5, image: '/images/webp/IMG_2971.webp' },
+  { key: 'o2',  delay: 2050, startAngle:  -45,   image: '/images/webp/IMG_2976.webp' },
+  { key: 'o10', delay: 2070, startAngle:  -22.5, image: '/images/webp/IMG_2972.webp' },
+  { key: 'o3',  delay: 2100, startAngle:    0,   image: '/images/webp/IMG_2979.webp' },
+  { key: 'o11', delay: 2120, startAngle:   22.5, image: '/images/webp/IMG_3005.webp' },
+  { key: 'o4',  delay: 2150, startAngle:   45,   image: '/images/webp/IMG_2980.webp' },
+  { key: 'o12', delay: 2170, startAngle:   67.5, image: '/images/webp/IMG_3006.webp' },
+  { key: 'o5',  delay: 2200, startAngle:   90,   image: '/images/webp/IMG_3004.webp' },
+  { key: 'o13', delay: 2170, startAngle:  112.5, image: '/images/webp/IMG_2974.webp' },
+  { key: 'o6',  delay: 2150, startAngle:  135,   image: '/images/webp/IMG_2968.webp' },
+  { key: 'o14', delay: 2120, startAngle:  157.5, image: '/images/webp/IMG_2971.webp' },
+  { key: 'o7',  delay: 2100, startAngle:  180,   image: '/images/webp/IMG_2969.webp' },
+  { key: 'o15', delay: 2070, startAngle: -157.5, image: '/images/webp/IMG_2972.webp' },
+  { key: 'o8',  delay: 2050, startAngle: -135,   image: '/images/webp/IMG_2970.webp' },
+  { key: 'o16', delay: 2020, startAngle: -112.5, image: '/images/webp/IMG_2974.webp' },
 ]
 
 const Gallery = ({ photos = {}, collapsed = false }) => {
@@ -203,5 +203,3 @@ const Gallery = ({ photos = {}, collapsed = false }) => {
 }
 
 export default Gallery
-
-

@@ -19,5 +19,3 @@ const PhotoFrame = ({ frameKey, imageSrc, outer = false }) => (
 )
 
 export default PhotoFrame
-
-
